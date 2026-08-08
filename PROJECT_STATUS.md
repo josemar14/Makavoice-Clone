@@ -4,11 +4,11 @@
 
 ## Estado atual
 
-- **Versão:** v0.1 — Fundação / Voice MVP
+- **Versão:** v0.1.1 — Voice Engine
 - **Branch:** main
 - **Deploy:** Cloudflare Workers + Assets
-- **Status geral:** MVP publicado e funcional no navegador
-- **Última etapa concluída:** publicação do site e teste do fluxo de voz
+- **Status geral:** arquitetura do Voice Engine implementada; aguardando configuração da chave do provedor e teste real
+- **Última etapa concluída:** camada modular de provedores criada
 
 ## O que já está funcionando
 
@@ -23,79 +23,107 @@
 - [x] Gravação de voz
 - [x] Preparação da voz para síntese
 - [x] Reprodução de áudio no MVP
+- [x] Worker/API de voz
+- [x] Adaptador de provedor ElevenLabs
+- [x] Gerenciador de provedores
+- [x] Endpoint `/api/voice/clone`
+- [x] Endpoint `/api/voice/synthesize`
+- [x] Endpoint `/api/health`
+- [x] Seleção de provedor por `?provider=`
+- [x] API Key mantida no ambiente do Cloudflare, não no frontend
 
-## O que ainda é protótipo
+## O que ainda falta
 
-- [ ] Clonagem real de voz por IA
-- [ ] TTS real usando voz clonada
-- [ ] Download de MP3/WAV gerado por IA
-- [ ] Backend seguro para provedores de voz
-- [ ] Sistema de múltiplos provedores
-- [ ] Gerenciamento de `voice_id`
-- [ ] Histórico de vozes
-- [ ] Sistema de seleção de provedor
+- [ ] Configurar `ELEVENLABS_API_KEY` como Secret no Cloudflare
+- [ ] Fazer novo deploy após a configuração
+- [ ] Testar `/api/health`
+- [ ] Testar clonagem real com voz autorizada
+- [ ] Testar TTS real
+- [ ] Testar download MP3
+- [ ] Melhorar mensagens de erro para usuário
+- [ ] Adicionar Provider 2
+- [ ] Adicionar Provider 3
+- [ ] Fallback automático entre provedores
+- [ ] Histórico persistente de vozes
 
 ## Etapa atual
 
 ### v0.1.1 — Voice Engine
 
-Objetivo: transformar o fluxo de voz do protótipo em um motor real e modular de clonagem/TTS.
+A camada modular já foi criada. O frontend continua chamando `/api/voice/clone` e `/api/voice/synthesize`, enquanto o Worker escolhe o provedor. ElevenLabs é o primeiro adaptador.
 
 ### Próxima tarefa
 
-1. Criar uma camada `Voice Engine` independente do provedor.
-2. Integrar ElevenLabs como primeiro provedor.
-3. Manter a API Key somente como Secret no Cloudflare.
-4. Criar endpoint seguro para clonagem.
-5. Criar endpoint seguro para TTS.
-6. Retornar áudio ao frontend.
-7. Reproduzir e permitir download do resultado.
-8. Testar com uma voz autorizada pelo usuário.
+1. Criar a Secret `ELEVENLABS_API_KEY` no Cloudflare.
+2. Fazer o deploy automático pelo GitHub.
+3. Abrir `/api/health` e confirmar `configured: true` para ElevenLabs.
+4. Testar criação de voz com uma gravação autorizada.
+5. Testar TTS e download.
 
-## Arquitetura planejada
+## Arquitetura atual
 
 ```text
                          MAKAVOICE
                              |
-                       VOICE ENGINE
+                       Cloudflare Worker
                              |
-              +--------------+--------------+
-              |              |              |
-         ElevenLabs      Provider 2      Provider 3
-              |              |              |
-           Clone            Clone            TTS
-              |              |              |
-              +--------------+--------------+
+                       Voice Engine API
                              |
-                            TTS
+                    Provider Manager
                              |
-                         MP3 / WAV
+                    +--------+--------+
+                    |                 |
+               ElevenLabs        Provider 2
+                    |                 |
+              Clone + TTS         futuro
+                    |
+                 MP3/WAV
+```
+
+## Estrutura nova
+
+```text
+Makavoice-Clone/
+├── src/
+│   ├── index.html
+│   ├── makavoice-app.html
+│   ├── manifest.json
+│   └── sw.js
+├── voice-engine/
+│   ├── provider-manager.js
+│   └── providers/
+│       └── elevenlabs.js
+├── worker.js
+├── wrangler.jsonc
+├── PROJECT_STATUS.md
+└── docs/
+    └── ROADMAP.md
 ```
 
 ## Provedores
 
 ### ElevenLabs
 
-- **Função:** primeiro provedor de referência para Voice Cloning/TTS.
-- **Status:** planejado para integração real.
-- **Secret necessário:** `ELEVENLABS_API_KEY`
+- **Função:** primeiro provedor de Voice Cloning/TTS.
+- **Status:** adaptador implementado; configuração do Secret pendente.
+- **Secret:** `ELEVENLABS_API_KEY`
 - **Regra:** nunca colocar a chave no código ou no GitHub.
 
 ### Provider 2
 
-- **Status:** ainda não definido.
+- **Status:** futuro.
 - **Objetivo:** alternativa/fallback de preço, disponibilidade ou qualidade.
 
 ### Provider 3
 
-- **Status:** reservado para futura expansão.
+- **Status:** futuro.
 
 ## Roadmap resumido
 
 ```text
-v0.1  Fundação              [EM ANDAMENTO/BASE CONCLUÍDA]
+v0.1  Fundação              [CONCLUÍDA]
   |
-v0.1.1 Voice Engine        [PRÓXIMA]
+v0.1.1 Voice Engine        [EM ANDAMENTO ← ESTAMOS AQUI]
   |
 v0.2  Core
   |
@@ -143,30 +171,28 @@ Ao retomar o projeto:
 
 ### 2026-08-08
 
-- Estrutura do Makavoice-Clone criada.
 - Site publicado no Cloudflare.
-- `index.html` definido como entrada.
-- PWA básico preparado.
-- Microfone testado com sucesso.
-- Gravação testada com sucesso.
-- Fluxo de preparação de voz testado.
-- Reprodução testada com sucesso.
-- Próximo objetivo definido: Voice Engine real e arquitetura multi-provedor.
+- Microfone e gravação testados com sucesso.
+- Voice Engine modular criado.
+- Adaptador ElevenLabs criado.
+- Provider Manager criado.
+- Worker atualizado para seleção de provedor.
+- Próxima ação: configurar Secret e executar teste real.
 
 ## Decisões arquiteturais
 
-- O frontend não deve conter API Keys.
-- O Cloudflare Worker será a camada intermediária segura para APIs externas.
-- O motor de voz será independente do provedor.
-- ElevenLabs será o primeiro provedor, mas não será obrigatório para toda a arquitetura.
-- Novos provedores deverão poder ser adicionados sem reescrever o frontend.
-- O projeto continuará usando GitHub como fonte principal do código.
-- O Cloudflare continuará responsável pelo deploy/publicação.
+- O frontend não contém API Keys.
+- O Cloudflare Worker é a camada intermediária para APIs externas.
+- O motor de voz é independente do provedor.
+- ElevenLabs é o primeiro provedor, mas não será obrigatório para toda a arquitetura.
+- Novos provedores poderão ser adicionados sem reescrever o frontend.
+- O projeto usa GitHub como fonte principal do código.
+- O Cloudflare é responsável pelo deploy/publicação.
 
 ## Bloqueios atuais
 
-Nenhum bloqueio técnico confirmado.
+**Configuração externa pendente:** `ELEVENLABS_API_KEY` ainda precisa ser criada como Secret no Cloudflare.
 
 ## Próximo marco
 
-**Concluir v0.1.1 — Voice Engine**, com clonagem e TTS reais através de um provedor externo, mantendo as credenciais protegidas no Cloudflare.
+**Concluir v0.1.1 — Voice Engine**, realizando o primeiro clone e TTS reais com um provedor externo.
