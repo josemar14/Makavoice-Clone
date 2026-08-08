@@ -25,7 +25,7 @@
     <header>
       <h1>🎙️ Makavoice</h1>
       <p class="subtitle">Voice Cloning & Text-to-Speech</p>
-      <div class="badge">IA de voz • Cloudflare • ElevenLabs</div>
+      <div class="badge">IA de voz • Cloudflare • Cartesia</div>
     </header>
 
     <div class="step">
@@ -113,12 +113,12 @@
         const form = new FormData();
         form.append('file', recordedBlob, 'makavoice-sample.webm');
         form.append('name', document.getElementById('voiceName').value.trim() || 'Minha Voz Makavoice');
-        const response = await fetch('/api/voice/clone', { method: 'POST', body: form });
+        const response = await fetch('/api/voice/clone?provider=cartesia', { method: 'POST', body: form });
         const data = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(data.details || data.error || `Erro HTTP ${response.status}`);
         voiceId = data.voice_id;
         localStorage.setItem('makavoice_voice_id', voiceId);
-        setStatus('cloneStatus', `✅ Clone de voz criado com sucesso! ID: ${voiceId}`, 'success');
+        setStatus('cloneStatus', `✅ Clone de voz criado com Cartesia! ID: ${voiceId}`, 'success');
       } catch (error) {
         setStatus('cloneStatus', `❌ ${error.message}`, 'error');
       } finally {
@@ -134,7 +134,7 @@
       button.disabled = true;
       setStatus('synthesisStatus', '⏳ Gerando áudio com sua voz clonada...');
       try {
-        const response = await fetch('/api/voice/synthesize', {
+        const response = await fetch('/api/voice/synthesize?provider=cartesia', {
           method: 'POST', headers: {'Content-Type':'application/json'},
           body: JSON.stringify({ voice_id: voiceId, text })
         });
@@ -150,7 +150,7 @@
         player.load();
         await player.play().catch(() => {});
         document.getElementById('downloadBtn').disabled = false;
-        setStatus('synthesisStatus', '✅ Áudio gerado com sua voz clonada!', 'success');
+        setStatus('synthesisStatus', '✅ Áudio gerado pelo Cartesia com sua voz clonada!', 'success');
       } catch (error) {
         setStatus('synthesisStatus', `❌ ${error.message}`, 'error');
       } finally { button.disabled = false; }
