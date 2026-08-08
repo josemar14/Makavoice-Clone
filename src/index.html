@@ -1,222 +1,40 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎙️ Makavoice - Voice Cloning & TTS</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #e2e8f0; }
-        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
-        header { text-align: center; padding: 40px 20px; border-bottom: 1px solid #1e293b; }
-        h1 { font-size: 2.5em; margin-bottom: 10px; }
-        .step { background: #1e293b; padding: 30px; margin: 20px 0; border-radius: 12px; border-left: 4px solid #0ea5e9; }
-        button { background: #0ea5e9; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px; margin: 10px 5px 10px 0; }
-        button:hover { background: #0284c7; }
-        input, textarea { background: #0f172a; color: #e2e8f0; border: 1px solid #1e293b; padding: 10px; border-radius: 8px; width: 100%; margin: 10px 0; }
-        .success { color: #10b981; }
-        .error { color: #ef4444; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="manifest" href="./manifest.json">
+  <title>🎙️ Makavoice - Voice Cloning & TTS</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0f172a;color:#e2e8f0}
+    .container{max-width:800px;margin:0 auto;padding:20px}
+    header{text-align:center;padding:40px 20px;border-bottom:1px solid #1e293b}
+    h1{font-size:2.5em;margin-bottom:10px}
+    .step{background:#1e293b;padding:30px;margin:20px 0;border-radius:12px;border-left:4px solid #0ea5e9}
+    button{background:#0ea5e9;color:white;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;font-size:16px;margin:10px 5px 10px 0}
+    button:hover{background:#0284c7}
+    textarea{background:#0f172a;color:#e2e8f0;border:1px solid #1e293b;padding:10px;border-radius:8px;width:100%;margin:10px 0}
+    .success{color:#10b981}.error{color:#ef4444}
+  </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🎙️ Makavoice</h1>
-            <p>Voice Cloning & Text-to-Speech</p>
-        </header>
-
-        <div class="step">
-            <h2>Step 1: Gravar sua Voz</h2>
-            <button onclick="startRecording()">🎤 Iniciar Gravação</button>
-            <button onclick="stopRecording()">⏹️ Parar</button>
-            <p id="recordStatus"></p>
-        </div>
-
-        <div class="step">
-            <h2>Step 2: Clonar Voz</h2>
-            <button onclick="cloneVoice()">🤖 Clonar Voz</button>
-            <p id="cloneStatus"></p>
-        </div>
-
-        <div class="step">
-            <h2>Step 3: Sintetizar Áudio</h2>
-            <textarea id="textInput" placeholder="Digite o texto aqui..."></textarea>
-            <button onclick="synthesize()">🎵 Criar Áudio</button>
-            <p id="synthesisStatus"></p>
-        </div>
-
-        <div class="step">
-            <h2>Step 4: Usar Áudio</h2>
-            <audio id="audioPlayer" controls style="width: 100%; margin: 10px 0;"></audio>
-            <button onclick="downloadAudio()">⬇️ Baixar MP3</button>
-        </div>
-    </div>
-
-    <script>
-        let mediaRecorder;
-        let audioChunks = [];
-        let recordedBlob;
-        let clonedVoice = null;
-
-        async function startRecording() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
-                audioChunks = [];
-                
-                mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
-                mediaRecorder.onstop = () => {
-                    recordedBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                    document.getElementById('recordStatus').innerHTML = '<span class="success">✅ Voz gravada com sucesso!</span>';
-                };
-                
-                mediaRecorder.start();
-                document.getElementById('recordStatus').innerHTML = '🔴 Gravando...';
-            } catch (error) {
-                document.getElementById('recordStatus').innerHTML = '<span class="error">❌ Erro ao acessar microfone</span>';
-            }
-        }
-
-        function stopRecording() {
-            if (mediaRecorder) {
-                mediaRecorder.stop();
-            }
-        }
-
-        function cloneVoice() {
-            if (!recordedBlob) {
-                document.getElementById('cloneStatus').innerHTML = '<span class="error">❌ Grave sua voz primeiro!</span>';
-                return;
-            }
-            cloned
-
-git add .
-git commit -m "🎙️ feat: adicionar index.html em src para GitHub Pages"
-git push origin main
-cat > src/index.html << 'EOF'
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎙️ Makavoice - Voice Cloning & TTS</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #e2e8f0; }
-        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
-        header { text-align: center; padding: 40px 20px; border-bottom: 1px solid #1e293b; }
-        h1 { font-size: 2.5em; margin-bottom: 10px; }
-        .step { background: #1e293b; padding: 30px; margin: 20px 0; border-radius: 12px; border-left: 4px solid #0ea5e9; }
-        button { background: #0ea5e9; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px; margin: 10px 5px 10px 0; }
-        button:hover { background: #0284c7; }
-        input, textarea { background: #0f172a; color: #e2e8f0; border: 1px solid #1e293b; padding: 10px; border-radius: 8px; width: 100%; margin: 10px 0; }
-        .success { color: #10b981; }
-        .error { color: #ef4444; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <header>
-            <h1>🎙️ Makavoice</h1>
-            <p>Voice Cloning & Text-to-Speech</p>
-        </header>
-
-        <div class="step">
-            <h2>Step 1: Gravar sua Voz</h2>
-            <button onclick="startRecording()">🎤 Iniciar Gravação</button>
-            <button onclick="stopRecording()">⏹️ Parar</button>
-            <p id="recordStatus"></p>
-        </div>
-
-        <div class="step">
-            <h2>Step 2: Clonar Voz</h2>
-            <button onclick="cloneVoice()">🤖 Clonar Voz</button>
-            <p id="cloneStatus"></p>
-        </div>
-
-        <div class="step">
-            <h2>Step 3: Sintetizar Áudio</h2>
-            <textarea id="textInput" placeholder="Digite o texto aqui..."></textarea>
-            <button onclick="synthesize()">🎵 Criar Áudio</button>
-            <p id="synthesisStatus"></p>
-        </div>
-
-        <div class="step">
-            <h2>Step 4: Usar Áudio</h2>
-            <audio id="audioPlayer" controls style="width: 100%; margin: 10px 0;"></audio>
-            <button onclick="downloadAudio()">⬇️ Baixar MP3</button>
-        </div>
-    </div>
-
-    <script>
-        let mediaRecorder;
-        let audioChunks = [];
-        let recordedBlob;
-        let clonedVoice = null;
-
-        async function startRecording() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
-                audioChunks = [];
-                
-                mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
-                mediaRecorder.onstop = () => {
-                    recordedBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                    document.getElementById('recordStatus').innerHTML = '<span class="success">✅ Voz gravada com sucesso!</span>';
-                };
-                
-                mediaRecorder.start();
-                document.getElementById('recordStatus').innerHTML = '🔴 Gravando...';
-            } catch (error) {
-                document.getElementById('recordStatus').innerHTML = '<span class="error">❌ Erro ao acessar microfone</span>';
-            }
-        }
-
-        function stopRecording() {
-            if (mediaRecorder) {
-                mediaRecorder.stop();
-            }
-        }
-
-        function cloneVoice() {
-            if (!recordedBlob) {
-                document.getElementById('cloneStatus').innerHTML = '<span class="error">❌ Grave sua voz primeiro!</span>';
-                return;
-            }
-            clonedVoice = recordedBlob;
-            document.getElementById('cloneStatus').innerHTML = '<span class="success">✅ Voz clonada com sucesso!</span>';
-        }
-
-        function synthesize() {
-            const text = document.getElementById('textInput').value;
-            if (!text) {
-                document.getElementById('synthesisStatus').innerHTML = '<span class="error">❌ Digite algum texto!</span>';
-                return;
-            }
-            if (!clonedVoice) {
-                document.getElementById('synthesisStatus').innerHTML = '<span class="error">❌ Clone uma voz primeiro!</span>';
-                return;
-            }
-            
-            document.getElementById('synthesisStatus').innerHTML = '<span class="success">✅ Áudio criado!</span>';
-            
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'pt-BR';
-            speechSynthesis.speak(utterance);
-        }
-
-        function downloadAudio() {
-            if (!recordedBlob) {
-                alert('Não há áudio para baixar');
-                return;
-            }
-            const url = URL.createObjectURL(recordedBlob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'makavoice-audio.webm';
-            a.click();
-        }
-    </script>
+  <div class="container">
+    <header><h1>🎙️ Makavoice</h1><p>Voice Cloning & Text-to-Speech</p></header>
+    <div class="step"><h2>Step 1: Gravar sua Voz</h2><button onclick="startRecording()">🎤 Iniciar Gravação</button><button onclick="stopRecording()">⏹️ Parar</button><p id="recordStatus"></p></div>
+    <div class="step"><h2>Step 2: Clonar Voz</h2><button onclick="cloneVoice()">🤖 Clonar Voz</button><p id="cloneStatus"></p></div>
+    <div class="step"><h2>Step 3: Sintetizar Áudio</h2><textarea id="textInput" placeholder="Digite o texto aqui..."></textarea><button onclick="synthesize()">🎵 Criar Áudio</button><p id="synthesisStatus"></p></div>
+    <div class="step"><h2>Step 4: Usar Áudio</h2><audio id="audioPlayer" controls style="width:100%;margin:10px 0"></audio><button onclick="downloadAudio()">⬇️ Baixar Áudio</button></div>
+  </div>
+  <script>
+    let mediaRecorder,audioChunks=[],recordedBlob,clonedVoice=null;
+    async function startRecording(){try{const stream=await navigator.mediaDevices.getUserMedia({audio:true});mediaRecorder=new MediaRecorder(stream);audioChunks=[];mediaRecorder.ondataavailable=e=>audioChunks.push(e.data);mediaRecorder.onstop=()=>{recordedBlob=new Blob(audioChunks,{type:'audio/webm'});stream.getTracks().forEach(t=>t.stop());document.getElementById('recordStatus').innerHTML='<span class="success">✅ Voz gravada com sucesso!</span>'};mediaRecorder.start();document.getElementById('recordStatus').innerHTML='🔴 Gravando...'}catch(e){document.getElementById('recordStatus').innerHTML='<span class="error">❌ Erro ao acessar microfone</span>'}}
+    function stopRecording(){if(mediaRecorder&&mediaRecorder.state!=='inactive')mediaRecorder.stop()}
+    function cloneVoice(){if(!recordedBlob){document.getElementById('cloneStatus').innerHTML='<span class="error">❌ Grave sua voz primeiro!</span>';return}clonedVoice=recordedBlob;document.getElementById('cloneStatus').innerHTML='<span class="success">✅ Voz preparada para síntese!</span>'}
+    function synthesize(){const text=document.getElementById('textInput').value.trim();if(!text){document.getElementById('synthesisStatus').innerHTML='<span class="error">❌ Digite algum texto!</span>';return}if(!clonedVoice){document.getElementById('synthesisStatus').innerHTML='<span class="error">❌ Prepare a voz primeiro!</span>';return}const u=new SpeechSynthesisUtterance(text);u.lang='pt-BR';speechSynthesis.speak(u);document.getElementById('synthesisStatus').innerHTML='<span class="success">✅ Reprodução iniciada!</span>'}
+    function downloadAudio(){if(!recordedBlob){alert('Não há áudio para baixar');return}const url=URL.createObjectURL(recordedBlob),a=document.createElement('a');a.href=url;a.download='makavoice-audio.webm';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+    if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'));
+  </script>
 </body>
 </html>
