@@ -1,8 +1,10 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "makavoice-clone",
+  "main": "./worker.js",
   "compatibility_date": "2026-08-08",
   "assets": {
-    "directory": "./src"
+    "directory": "./src",
+    "binding": "ASSETS"
   }
 }
