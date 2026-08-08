@@ -7,8 +7,8 @@
 - **Versão:** v0.1.1 — Voice Engine
 - **Branch:** main
 - **Deploy:** Cloudflare Workers + Assets
-- **Status geral:** arquitetura do Voice Engine implementada; aguardando configuração da chave do provedor e teste real
-- **Última etapa concluída:** camada modular de provedores criada
+- **Status geral:** arquitetura do Voice Engine implementada; Secret configurado; aguardando novo deploy e teste real
+- **Última etapa concluída:** camada modular de provedores criada e Secret do Cloudflare configurado
 
 ## O que já está funcionando
 
@@ -21,7 +21,7 @@
 - [x] Site publicado em `makavoice-clone.josemarmartins1714.workers.dev`
 - [x] Acesso ao microfone pelo navegador
 - [x] Gravação de voz
-- [x] Preparação da voz para síntese
+- [x] Preparação de voz para síntese
 - [x] Reprodução de áudio no MVP
 - [x] Worker/API de voz
 - [x] Adaptador de provedor ElevenLabs
@@ -31,12 +31,13 @@
 - [x] Endpoint `/api/health`
 - [x] Seleção de provedor por `?provider=`
 - [x] API Key mantida no ambiente do Cloudflare, não no frontend
+- [x] `ELEVENLABS_API_KEY` criado como Secret no Cloudflare
 
 ## O que ainda falta
 
-- [ ] Configurar `ELEVENLABS_API_KEY` como Secret no Cloudflare
-- [ ] Fazer novo deploy após a configuração
+- [ ] Novo deploy da versão do Voice Engine
 - [ ] Testar `/api/health`
+- [ ] Confirmar `configured: true` para ElevenLabs
 - [ ] Testar clonagem real com voz autorizada
 - [ ] Testar TTS real
 - [ ] Testar download MP3
@@ -50,12 +51,12 @@
 
 ### v0.1.1 — Voice Engine
 
-A camada modular já foi criada. O frontend continua chamando `/api/voice/clone` e `/api/voice/synthesize`, enquanto o Worker escolhe o provedor. ElevenLabs é o primeiro adaptador.
+A camada modular já foi criada. O frontend chama `/api/voice/clone` e `/api/voice/synthesize`, enquanto o Worker escolhe o provedor. ElevenLabs é o primeiro adaptador.
 
 ### Próxima tarefa
 
-1. Criar a Secret `ELEVENLABS_API_KEY` no Cloudflare.
-2. Fazer o deploy automático pelo GitHub.
+1. Aguardar o novo build/deploy provocado por este commit.
+2. Confirmar uma nova Version ID no Cloudflare.
 3. Abrir `/api/health` e confirmar `configured: true` para ElevenLabs.
 4. Testar criação de voz com uma gravação autorizada.
 5. Testar TTS e download.
@@ -105,7 +106,7 @@ Makavoice-Clone/
 ### ElevenLabs
 
 - **Função:** primeiro provedor de Voice Cloning/TTS.
-- **Status:** adaptador implementado; configuração do Secret pendente.
+- **Status:** adaptador implementado; Secret configurado.
 - **Secret:** `ELEVENLABS_API_KEY`
 - **Regra:** nunca colocar a chave no código ou no GitHub.
 
@@ -177,7 +178,8 @@ Ao retomar o projeto:
 - Adaptador ElevenLabs criado.
 - Provider Manager criado.
 - Worker atualizado para seleção de provedor.
-- Próxima ação: configurar Secret e executar teste real.
+- `ELEVENLABS_API_KEY` configurado como Secret no Cloudflare.
+- Novo commit criado para provocar o próximo deploy.
 
 ## Decisões arquiteturais
 
@@ -191,7 +193,7 @@ Ao retomar o projeto:
 
 ## Bloqueios atuais
 
-**Configuração externa pendente:** `ELEVENLABS_API_KEY` ainda precisa ser criada como Secret no Cloudflare.
+Nenhum bloqueio de código confirmado. O próximo passo depende do novo deploy do Cloudflare para testar o Worker atualizado.
 
 ## Próximo marco
 
