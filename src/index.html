@@ -62,6 +62,7 @@
     let audioChunks = [];
     let recordedBlob = null;
     let voiceId = localStorage.getItem('makavoice_voice_id') || null;
+    let voiceProvider = localStorage.getItem('makavoice_voice_provider') || 'elevenlabs';
     let generatedAudioUrl = null;
 
     function setStatus(id, message, type='') {
@@ -117,8 +118,10 @@
         const data = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(data.details || data.error || `Erro HTTP ${response.status}`);
         voiceId = data.voice_id;
+        voiceProvider = data.provider || 'elevenlabs';
+        localStorage.setItem('makavoice_voice_provider', voiceProvider);
         localStorage.setItem('makavoice_voice_id', voiceId);
-        setStatus('cloneStatus', `✅ Clone de voz criado com ElevenLabs! ID: ${voiceId}`, 'success');
+        setStatus('cloneStatus', `✅ Clone de voz criado com ${voiceProvider}! ID: ${voiceId}`, 'success');
       } catch (error) {
         setStatus('cloneStatus', `❌ ${error.message}`, 'error');
       } finally {
@@ -136,7 +139,7 @@
       try {
         const response = await fetch('/api/voice/synthesize', {
           method: 'POST', headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({ voice_id: voiceId, text })
+          body: JSON.stringify({ voice_id: voiceId, provider: voiceProvider, text })
         });
         if (!response.ok) {
           const data = await response.json().catch(() => ({}));
