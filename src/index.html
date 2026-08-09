@@ -15,9 +15,13 @@
     .step{background:#1e293b;padding:30px;margin:20px 0;border-radius:12px;border-left:4px solid #0ea5e9}
     button{background:#0ea5e9;color:white;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;font-size:16px;margin:10px 5px 10px 0}
     button:hover{background:#0284c7}button:disabled{opacity:.55;cursor:not-allowed}
-    input,textarea{background:#0f172a;color:#e2e8f0;border:1px solid #334155;padding:12px;border-radius:8px;width:100%;margin:10px 0;font-size:16px}
-    textarea{min-height:120px;resize:vertical}.success{color:#10b981}.error{color:#ef4444}.muted{color:#94a3b8;font-size:.9rem;margin-top:8px}
+    input,textarea,select{background:#0f172a;color:#e2e8f0;border:1px solid #334155;padding:12px;border-radius:8px;width:100%;margin:10px 0;font-size:16px}
+    textarea{min-height:120px;resize:vertical}.success{color:#10b981}.error{color:#ef4444}.warning{color:#f59e0b}.muted{color:#94a3b8;font-size:.9rem;margin-top:8px}
     .badge{display:inline-block;padding:5px 10px;border-radius:999px;background:#334155;margin-top:12px;font-size:.85rem}
+    .provider-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+    .provider-card{border:1px solid #334155;border-radius:10px;padding:12px;background:#0f172a}
+    .provider-card strong{display:block;margin-bottom:4px}.provider-card small{color:#94a3b8}
+    @media(max-width:600px){.provider-grid{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
@@ -25,12 +29,12 @@
     <header>
       <h1>🎙️ Makavoice</h1>
       <p class="subtitle">Voice Cloning & Text-to-Speech</p>
-      <div class="badge">IA de voz • Cloudflare • Cartesia</div>
+      <div class="badge">IA de voz • Cloudflare • Multi-provedor</div>
     </header>
 
     <div class="step">
       <h2>Step 1: Gravar sua Voz</h2>
-      <p class="muted">Use uma gravação limpa, sem música ou outras pessoas falando.</p>
+      <p class="muted">Para melhor qualidade, grave cerca de 1–2 minutos, com voz limpa, sem música ou outras pessoas falando.</p>
       <button id="startBtn" onclick="startRecording()">🎤 Iniciar Gravação</button>
       <button id="stopBtn" onclick="stopRecording()" disabled>⏹️ Parar</button>
       <p id="recordStatus"></p>
@@ -38,6 +42,15 @@
 
     <div class="step">
       <h2>Step 2: Clonar Voz com IA</h2>
+      <label for="providerSelect"><strong>🎙️ Provedor de voz</strong></label>
+      <select id="providerSelect" onchange="changeProvider()" aria-label="Provedor de voz">
+        <option value="elevenlabs">ElevenLabs — recomendado</option>
+        <option value="cartesia">Cartesia — segundo provedor</option>
+      </select>
+      <div class="provider-grid">
+        <div class="provider-card"><strong>ElevenLabs</strong><small>Clonagem instantânea exige plano compatível.</small></div>
+        <div class="provider-card"><strong>Cartesia</strong><small>Alguns recursos de clonagem exigem plano compatível.</small></div>
+      </div>
       <input id="voiceName" value="Minha Voz Makavoice" maxlength="100" aria-label="Nome da voz">
       <button id="cloneBtn" onclick="cloneVoice()">🤖 Criar Clone de Voz</button>
       <p id="cloneStatus"></p>
@@ -45,6 +58,7 @@
 
     <div class="step">
       <h2>Step 3: Sintetizar Áudio</h2>
+      <p class="muted">A síntese usa automaticamente o mesmo provedor associado ao clone salvo.</p>
       <textarea id="textInput" maxlength="10000" placeholder="Digite o texto que deseja falar com sua voz clonada..."></textarea>
       <button id="synthBtn" onclick="synthesize()">🎵 Criar Áudio com Minha Voz</button>
       <p id="synthesisStatus"></p>
@@ -69,6 +83,24 @@
       document.getElementById(id).innerHTML = type ? `<span class="${type}">${message}</span>` : message;
     }
 
+    function providerLabel(provider) {
+      return provider === 'cartesia' ? 'Cartesia' : 'ElevenLabs';
+    }
+
+    function changeProvider() {
+      const selected = document.getElementById('providerSelect').value;
+      if (voiceId && selected !== voiceProvider) {
+        voiceId = null;
+        localStorage.removeItem('makavoice_voice_id');
+        localStorage.removeItem('makavoice_voice_provider');
+        setStatus('cloneStatus', `⚠️ Provedor alterado para ${providerLabel(selected)}. O clone anterior foi desvinculado para evitar usar uma voz de outro provedor. Grave e crie um novo clone.`, 'warning');
+        return;
+      }
+      voiceProvider = selected;
+      localStorage.setItem('makavoice_voice_provider', voiceProvider);
+      setStatus('cloneStatus', `ℹ️ Provedor selecionado: ${providerLabel(voiceProvider)}.`);
+    }
+
     function chooseMimeType() {
       const types = ['audio/webm;codecs=opus','audio/webm','audio/mp4'];
       return types.find(t => MediaRecorder.isTypeSupported(t)) || '';
@@ -90,7 +122,7 @@
         mediaRecorder.start();
         document.getElementById('startBtn').disabled = true;
         document.getElementById('stopBtn').disabled = false;
-        setStatus('recordStatus', '🔴 Gravando... Fale naturalmente por pelo menos 20–30 segundos.');
+        setStatus('recordStatus', '🔴 Gravando... Para melhor resultado, fale naturalmente por cerca de 1–2 minutos.');
       } catch (e) {
         setStatus('recordStatus', '❌ Não foi possível acessar o microfone. Permita o acesso e tente novamente.', 'error');
       }
@@ -107,21 +139,32 @@
         setStatus('cloneStatus', '❌ Grave sua voz primeiro!', 'error');
         return;
       }
+      const provider = document.getElementById('providerSelect').value;
+      voiceProvider = provider;
       const button = document.getElementById('cloneBtn');
       button.disabled = true;
-      setStatus('cloneStatus', '⏳ Enviando sua gravação para criar o clone de voz...');
+      setStatus('cloneStatus', `⏳ Enviando sua gravação para ${providerLabel(provider)}...`);
       try {
         const form = new FormData();
         form.append('file', recordedBlob, 'makavoice-sample.webm');
         form.append('name', document.getElementById('voiceName').value.trim() || 'Minha Voz Makavoice');
-        const response = await fetch('/api/voice/clone', { method: 'POST', body: form });
+        const response = await fetch(`/api/voice/clone?provider=${encodeURIComponent(provider)}`, { method: 'POST', body: form });
         const data = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(data.details || data.error || `Erro HTTP ${response.status}`);
+        if (!response.ok) {
+          let message = data.details || data.error || `Erro HTTP ${response.status}`;
+          if (provider === 'elevenlabs' && /paid_plan_required|payment_required|instant voice cloning|plan/i.test(message)) {
+            message = 'A conta ElevenLabs não possui clonagem instantânea disponível no plano atual. Faça upgrade ou escolha outro provedor compatível.';
+          } else if (provider === 'cartesia' && /plan_upgrade_required|payment_required|free tier|upgrade/i.test(message)) {
+            message = 'A conta Cartesia não possui este recurso disponível no plano atual. Faça upgrade ou escolha outro provedor compatível.';
+          }
+          throw new Error(message);
+        }
         voiceId = data.voice_id;
-        voiceProvider = data.provider || 'elevenlabs';
+        voiceProvider = data.provider || provider;
         localStorage.setItem('makavoice_voice_provider', voiceProvider);
         localStorage.setItem('makavoice_voice_id', voiceId);
-        setStatus('cloneStatus', `✅ Clone de voz criado com ${voiceProvider}! ID: ${voiceId}`, 'success');
+        document.getElementById('providerSelect').value = voiceProvider;
+        setStatus('cloneStatus', `✅ Clone de voz criado com ${providerLabel(voiceProvider)}! ID: ${voiceId}`, 'success');
       } catch (error) {
         setStatus('cloneStatus', `❌ ${error.message}`, 'error');
       } finally {
@@ -135,7 +178,7 @@
       if (!voiceId) { setStatus('synthesisStatus', '❌ Crie o clone de voz primeiro!', 'error'); return; }
       const button = document.getElementById('synthBtn');
       button.disabled = true;
-      setStatus('synthesisStatus', '⏳ Gerando áudio com sua voz clonada...');
+      setStatus('synthesisStatus', `⏳ Gerando áudio com ${providerLabel(voiceProvider)}...`);
       try {
         const response = await fetch('/api/voice/synthesize', {
           method: 'POST', headers: {'Content-Type':'application/json'},
@@ -143,7 +186,13 @@
         });
         if (!response.ok) {
           const data = await response.json().catch(() => ({}));
-          throw new Error(data.details || data.error || `Erro HTTP ${response.status}`);
+          let message = data.details || data.error || `Erro HTTP ${response.status}`;
+          if (voiceProvider === 'elevenlabs' && /paid_plan_required|payment_required|plan/i.test(message)) {
+            message = 'A conta ElevenLabs não possui este recurso disponível no plano atual.';
+          } else if (voiceProvider === 'cartesia' && /plan_upgrade_required|payment_required|free tier|upgrade/i.test(message)) {
+            message = 'A conta Cartesia não possui este recurso disponível no plano atual.';
+          }
+          throw new Error(message);
         }
         const audioBlob = await response.blob();
         if (generatedAudioUrl) URL.revokeObjectURL(generatedAudioUrl);
@@ -153,7 +202,7 @@
         player.load();
         await player.play().catch(() => {});
         document.getElementById('downloadBtn').disabled = false;
-        setStatus('synthesisStatus', '✅ Áudio gerado com sua voz clonada!', 'success');
+        setStatus('synthesisStatus', `✅ Áudio gerado com sua voz clonada via ${providerLabel(voiceProvider)}!`, 'success');
       } catch (error) {
         setStatus('synthesisStatus', `❌ ${error.message}`, 'error');
       } finally { button.disabled = false; }
@@ -165,7 +214,8 @@
       a.href = generatedAudioUrl; a.download = 'makavoice-voz-clonada.mp3'; a.click();
     }
 
-    if (voiceId) setStatus('cloneStatus', '✅ Um clone de voz já está salvo neste navegador. Você pode gerar novo áudio.','success');
+    document.getElementById('providerSelect').value = voiceProvider;
+    if (voiceId) setStatus('cloneStatus', `✅ Um clone de voz ${providerLabel(voiceProvider)} já está salvo neste navegador. Você pode gerar novo áudio.`, 'success');
     if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
   </script>
 </body>
