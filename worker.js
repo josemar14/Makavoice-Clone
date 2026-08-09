@@ -15,6 +15,12 @@ function json(data, status = 200) {
   });
 }
 
+function resolveProvider(url, requestedProvider) {
+  const provider = String(requestedProvider || url.searchParams.get("provider") || "elevenlabs").trim().toLowerCase();
+  if (!provider) return "elevenlabs";
+  return provider;
+}
+
 async function cloneVoice(request, env, providerName) {
   const incoming = await request.formData();
   const file = incoming.get("file");
@@ -26,9 +32,18 @@ async function cloneVoice(request, env, providerName) {
   try {
     const provider = getProvider(providerName);
     const result = await provider.clone({ file, name }, env);
-    return json({ success: true, provider: provider.name, voice_id: result.voice_id, requires_verification: result.requires_verification ?? false });
+    return json({
+      success: true,
+      provider: provider.name,
+      voice_id: result.voice_id,
+      requires_verification: result.requires_verification ?? false,
+    });
   } catch (error) {
-    return json({ error: error.message || "Falha na clonagem.", details: error.details || "", provider: providerName }, error.status || 500);
+    return json({
+      error: error.message || "Falha na clonagem.",
+      details: error.details || "",
+      provider: providerName,
+    }, error.status || 500);
   }
 }
 
@@ -49,7 +64,11 @@ async function synthesize(request, env, providerName) {
     Object.entries(corsHeaders()).forEach(([key, value]) => headers.set(key, value));
     return new Response(response.body, { status: 200, headers });
   } catch (error) {
-    return json({ error: error.message || "Falha na síntese.", details: error.details || "", provider: providerName }, error.status || 500);
+    return json({
+      error: error.message || "Falha na síntese.",
+      details: error.details || "",
+      provider: providerName,
+    }, error.status || 500);
   }
 }
 
@@ -57,14 +76,21 @@ export default {
   async fetch(request, env) {
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: corsHeaders() });
     const url = new URL(request.url);
-    const provider = url.searchParams.get("provider") || "elevenlabs";
 
     try {
       if (url.pathname === "/api/health") {
         return json({ ok: true, service: "makavoice-voice-engine", providers: listProviders(env) });
       }
-      if (url.pathname === "/api/voice/clone" && request.method === "POST") return cloneVoice(request, env, provider);
-      if (url.pathname === "/api/voice/synthesize" && request.method === "POST") return synthesize(request, env, provider);
+      if (url.pathname === "/api/voice/clone" && request.method === "POST") {
+        const provider = resolveProvider(url);
+        return cloneVoice(request, env, provider);
+      }
+      if (url.pathname === "/api/voice/synthesize" && request.method === "POST") {
+        let input = {};
+        try { input = await request.clone().json(); } catch {}
+        const provider = resolveProvider(url, input.provider);
+        return synthesize(request, env, provider);
+      }
       if (env.ASSETS) return env.ASSETS.fetch(request);
       return new Response("Makavoice Worker online", { status: 200 });
     } catch (error) {
